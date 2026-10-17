@@ -1,0 +1,18 @@
+# Configuración mínima para Supabase CLI (supabase link / db push / functions deploy)
+project_id = "gestion-cursos"
+
+[api]
+schemas = ["public"]
+max_rows = 1000
+
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["https://*.vercel.app"]
+enable_signup = false          # el alta de usuarios la hace un administrador
+minimum_password_length = 10
+
+[functions.consulta-dni]
+verify_jwt = true
+
+[functions.crear-usuario]
+verify_jwt = true

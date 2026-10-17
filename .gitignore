@@ -1,0 +1,18 @@
+node_modules
+dist
+dev-dist
+.env
+.env.local
+.env.*.local
+.vercel
+supabase/.temp
+supabase/.branches
+*.log
+.DS_Store
+
+# Variables de entorno (la plantilla .env.example sí se versiona: no tiene secretos)
+.env*
+!.env.example
+
+# Scripts SQL (migraciones y datos de ejemplo)
+*.sql
