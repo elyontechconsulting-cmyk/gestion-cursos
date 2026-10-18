@@ -7,6 +7,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermisos } from '@/hooks/usePermisos';
 import { useOnline } from '@/hooks/useOnline';
+import { useRealtime } from '@/hooks/useRealtime';
 import { useShallow } from 'zustand/react/shallow';
 import { useUiStore, type Tema } from '@/store/ui.store';
 import type { Permiso } from '@/lib/permissions';
@@ -49,6 +50,7 @@ export default function AppLayout() {
   );
   const online = useOnline();
   const location = useLocation();
+  useRealtime(online);
 
   useEffect(() => setMovil(false), [location.pathname, setMovil]);
 

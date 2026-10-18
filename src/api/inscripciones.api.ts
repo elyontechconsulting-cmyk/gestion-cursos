@@ -8,12 +8,13 @@ export interface InscripcionFiltros extends PageParams {
   cursoId?: string;
   estudianteId?: string;
   estado?: EstadoInscripcion | '';
-  estadoPago?: EstadoPago | '';
+  /** Uno o varios estados; vacío = todos */
+  estadoPago?: EstadoPago | EstadoPago[] | '';
   desde?: string;
   hasta?: string;
 }
 
-function aplicarFiltros<Q extends { eq: Function; gte: Function; lte: Function; or: Function; like: Function }>(
+function aplicarFiltros<Q extends { eq: Function; in: Function; gte: Function; lte: Function; or: Function; like: Function }>(
   q: Q,
   f: Omit<InscripcionFiltros, 'page' | 'pageSize'>,
 ): Q {
@@ -26,7 +27,11 @@ function aplicarFiltros<Q extends { eq: Function; gte: Function; lte: Function; 
   if (f.cursoId) q = q.eq('curso_id', f.cursoId);
   if (f.estudianteId) q = q.eq('estudiante_id', f.estudianteId);
   if (f.estado) q = q.eq('estado', f.estado);
-  if (f.estadoPago) q = q.eq('estado_pago', f.estadoPago);
+  if (Array.isArray(f.estadoPago)) {
+    if (f.estadoPago.length) q = q.in('estado_pago', f.estadoPago);
+  } else if (f.estadoPago) {
+    q = q.eq('estado_pago', f.estadoPago);
+  }
   if (f.desde) q = q.gte('fecha_inscripcion', f.desde);
   if (f.hasta) q = q.lte('fecha_inscripcion', f.hasta);
   return q;

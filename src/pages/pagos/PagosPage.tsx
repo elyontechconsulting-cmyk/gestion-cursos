@@ -6,7 +6,7 @@ import { useCursosOpciones } from '@/hooks/useCursos';
 import { usePaginacion } from '@/hooks/usePaginacion';
 import { usePermisos } from '@/hooks/usePermisos';
 import { pagosApi } from '@/api/pagos.api';
-import { Button, DataTable, EstadoBadge, Field, FilterBar, IconAction, Input, PageHeader, Select, type Column } from '@/components/ui';
+import { Button, DataTable, EstadoBadge, Field, FilterBar, IconAction, Input, MultiSelect, PageHeader, Select, type Column } from '@/components/ui';
 import { ESTADOS_PAGO, MEDIOS_PAGO, toOptions } from '@/lib/constants';
 import { formatFecha, formatMoneda } from '@/utils/format';
 import { notify } from '@/services/notify';
@@ -39,7 +39,10 @@ export default function PagosPage() {
 
 function TabSaldos() {
   const { puede } = usePermisos();
-  const t = usePaginacion({ estadoPago: 'pendiente' as EstadoPago | '', cursoId: '' });
+  // Por defecto: lo que aún tiene saldo (Pendiente y Parcial)
+  const t = usePaginacion({ estadoPago: ['pendiente', 'parcial'] as EstadoPago[], cursoId: '' });
+  // "Todos" (ninguno o los tres marcados) no cuenta como filtro activo
+  const filtraEstado = t.filtros.estadoPago.length > 0 && t.filtros.estadoPago.length < Object.keys(ESTADOS_PAGO).length;
   const { data, isLoading, isFetching } = useInscripciones(t.params);
   const { data: cursos = [] } = useCursosOpciones(false);
   const [pagar, setPagar] = useState<InscripcionDetalle | null>(null);
@@ -63,12 +66,16 @@ function TabSaldos() {
 
   return (
     <>
-      <FilterBar search={t.search} onSearch={t.setSearch} placeholder="Buscar estudiante, DNI o curso…" activos={Object.values(t.filtros).filter(Boolean).length} onClear={t.limpiarFiltros}>
+      <FilterBar
+        search={t.search} onSearch={t.setSearch} placeholder="Buscar estudiante, DNI o curso…"
+        activos={(filtraEstado ? 1 : 0) + (t.filtros.cursoId ? 1 : 0)} onClear={t.limpiarFiltros}
+      >
         <Field label="Estado de pago">
-          <Select value={t.filtros.estadoPago} onChange={(e) => t.setFiltro('estadoPago', e.target.value as EstadoPago | '')}>
-            <option value="">Todos</option>
-            {toOptions(ESTADOS_PAGO).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </Select>
+          <MultiSelect
+            options={toOptions(ESTADOS_PAGO)}
+            value={t.filtros.estadoPago}
+            onChange={(v) => t.setFiltro('estadoPago', v)}
+          />
         </Field>
         <Field label="Curso">
           <Select value={t.filtros.cursoId} onChange={(e) => t.setFiltro('cursoId', e.target.value)}>

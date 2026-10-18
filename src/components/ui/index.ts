@@ -9,3 +9,4 @@ export * from './SearchInput';
 export * from './DataTable';
 export * from './IconAction';
 export * from './FilterBar';
+export * from './MultiSelect';
