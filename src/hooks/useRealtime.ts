@@ -8,8 +8,8 @@ type QueryKey = readonly string[];
 /** Qué datos de la app quedan desactualizados cuando cambia cada tabla. */
 const AFECTADOS: Record<string, QueryKey[]> = {
   pagos: [queryKeys.pagos, queryKeys.inscripciones, queryKeys.cursos, queryKeys.dashboard, queryKeys.reportes],
-  inscripciones: [queryKeys.inscripciones, queryKeys.pagos, queryKeys.cursos, queryKeys.dashboard, queryKeys.reportes],
-  estudiantes: [queryKeys.estudiantes, queryKeys.inscripciones, queryKeys.dashboard, queryKeys.reportes],
+  inscripciones: [queryKeys.inscripciones, queryKeys.pagos, queryKeys.cursos, queryKeys.dashboard, queryKeys.reportes, queryKeys.academico],
+  estudiantes: [queryKeys.estudiantes, queryKeys.inscripciones, queryKeys.dashboard, queryKeys.reportes, queryKeys.academico],
 };
 
 /**

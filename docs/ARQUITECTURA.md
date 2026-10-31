@@ -70,13 +70,22 @@ erDiagram
   CURSOS ||--o{ INSCRIPCIONES : tiene
   ESTUDIANTES ||--o{ INSCRIPCIONES : realiza
   INSCRIPCIONES ||--o{ PAGOS : recibe
+  USUARIOS ||--o{ CURSOS : "es tutor (tutor_id)"
+  CURSOS ||--o{ CURSO_PROFESORES : asigna
+  PROFESORES ||--o{ CURSO_PROFESORES : dicta
+  INSCRIPCIONES ||--o{ ASISTENCIAS : "por sesión"
+  INSCRIPCIONES ||--o| CALIFICACIONES : tiene
 
   ROLES { smallint id PK; text codigo UK; text nombre; text descripcion }
   USUARIOS { uuid id PK "= auth.users.id"; text email UK; text nombre_completo; smallint rol_id FK; bool activo; timestamptz created_at; timestamptz updated_at; timestamptz deleted_at }
-  CURSOS { uuid id PK; varchar codigo "UK si no eliminado"; varchar nombre; text descripcion; date fecha_inicio; date fecha_fin; varchar horario; enum modalidad; numeric costo; int cupos; enum estado; timestamptz created_at; timestamptz deleted_at }
+  CURSOS { uuid id PK; varchar codigo "UK si no eliminado"; varchar nombre; text descripcion; date fecha_inicio; date fecha_fin; varchar horario; enum modalidad; numeric costo; int cupos; enum estado; uuid tutor_id FK; smallint numero_sesiones; smallint faltas_maximas; numeric nota_aprobatoria; timestamptz created_at; timestamptz deleted_at }
   ESTUDIANTES { uuid id PK; char dni "UK si no eliminado"; varchar nombres; varchar apellido_paterno; varchar apellido_materno; varchar correo; varchar telefono; varchar direccion; date fecha_nacimiento; enum estado; timestamptz created_at; timestamptz deleted_at }
   INSCRIPCIONES { uuid id PK; uuid estudiante_id FK; uuid curso_id FK; date fecha_inscripcion; enum estado; text observacion; numeric monto_total "snapshot del costo"; timestamptz deleted_at }
   PAGOS { uuid id PK; uuid inscripcion_id FK; numeric monto; date fecha_pago; enum medio_pago; varchar numero_operacion; text observaciones; timestamptz deleted_at }
+  PROFESORES { uuid id PK; char dni "UK si no eliminado"; varchar nombres; varchar apellidos; varchar telefono; varchar correo; varchar especialidad; enum estado; timestamptz deleted_at }
+  CURSO_PROFESORES { uuid id PK; uuid curso_id FK; uuid profesor_id FK }
+  ASISTENCIAS { uuid id PK; uuid inscripcion_id FK; smallint sesion "UK con inscripcion_id"; bool asistio; bool devocional; bool interseccion; bool servicio }
+  CALIFICACIONES { uuid id PK; uuid inscripcion_id FK "UK"; numeric nota_trabajo; numeric nota_examen; text observacion }
   AUDITORIA { bigint id PK; uuid usuario_id; text usuario_email; enum accion; text tabla; text registro_id; jsonb datos_anteriores; jsonb datos_nuevos; timestamptz fecha }
 ```
 
@@ -88,7 +97,12 @@ erDiagram
 |---|---|---|
 | Vista | `v_inscripciones_detalle` | Inscripción + estudiante + curso + total pagado + **saldo pendiente** + estado de pago |
 | Vista | `v_pagos_detalle` | Pagos con nombres de estudiante, curso y usuario que registró |
-| Vista | `v_cursos_resumen` | Curso + inscritos, cupos disponibles, pagados, pendientes, recaudado, por cobrar |
+| Vista | `v_cursos_resumen` | Curso + inscritos, cupos disponibles, pagados, pendientes, recaudado, por cobrar, tutor y profesores |
+| Vista | `v_notas` | Por inscripción: asistencias, faltas, devocionales, intersecciones, servicios, sus notas (× 2, tope 20), trabajo, examen, **promedio final** y estado académico |
+| Vista | `v_personal` | Nombre de administradores y operadores activos (posibles tutores). Lee de `fn_personal()` (`SECURITY DEFINER`, solo expone id, nombre, correo y rol): los operadores no leen `usuarios`, pero deben ver el nombre del tutor |
+| RPC | `fn_guardar_profesores_curso(curso, ids[])` | Reemplaza los profesores de un curso (solo administrador) |
+| Función | `fn_puede_registrar_inscripcion(id)` | RLS de asistencias y calificaciones: administrador, o el operador tutor del curso |
+| Trigger | `fn_validar_registro_academico` | Sesión ≤ `numero_sesiones`, inscripción no retirada |
 | RPC | `fn_dashboard_resumen()` | Tarjetas del dashboard en una sola llamada |
 | RPC | `fn_recaudacion_mensual(desde, hasta)` | Serie mensual para gráficos |
 | Trigger | `fn_validar_inscripcion` | Curso abierto, estudiante activo, **no duplicado**, **cupos disponibles**, snapshot de costo |
@@ -109,6 +123,18 @@ Total del curso        = inscripciones.monto_total   (copiado de cursos.costo al
 -------------------------------------------------
 Saldo pendiente        = total − pagado
 Estado de pago         = pagado si saldo ≤ 0 · parcial si pagado > 0 · pendiente en otro caso
+```
+
+### Cálculo del promedio final
+
+```
+Nota asistencia   = LEAST(asistencias    × 2, 20)
+Nota devocional   = LEAST(devocionales   × 2, 20)
+Nota intersección = LEAST(intersecciones × 2, 20)
+Nota servicio     = LEAST(servicios      × 2, 20)
+Promedio final    = ROUND((4 notas anteriores + trabajo + examen) / 6, 2)   -- sin nota cuenta 0
+Estado académico  = retirado · desaprobado_faltas si faltas ≥ faltas_maximas ·
+                    en_curso si falta trabajo o examen · aprobado si promedio ≥ nota_aprobatoria · desaprobado
 ```
 
 ## 4. Estado y caché

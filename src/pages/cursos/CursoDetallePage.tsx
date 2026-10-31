@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, CalendarDays, Clock, FileSpreadsheet, FileText, MapPin, Plus, Wallet } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, CalendarDays, Clock, FileSpreadsheet, FileText, GraduationCap, MapPin, NotebookPen, Plus, UserCheck, Wallet } from 'lucide-react';
 import { useCurso } from '@/hooks/useCursos';
 import { useInscripciones } from '@/hooks/useInscripciones';
 import { usePermisos } from '@/hooks/usePermisos';
@@ -17,6 +17,7 @@ import type { InscripcionDetalle } from '@/types/database';
 
 export default function CursoDetallePage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { puede } = usePermisos();
   const { data: curso, isLoading } = useCurso(id);
   const [page, setPage] = useState(1);
@@ -75,6 +76,9 @@ export default function CursoDetallePage() {
         description={`${curso.codigo} · ${MODALIDADES[curso.modalidad]}`}
         actions={
           <>
+            {puede('academico.ver') && (
+              <Button variant="outline" icon={<NotebookPen className="h-4 w-4" />} onClick={() => navigate(`/academico/${curso.id}`)}>Registro académico</Button>
+            )}
             <Button variant="outline" icon={<FileSpreadsheet className="h-4 w-4" />} onClick={() => exportar('xlsx')}>Excel</Button>
             <Button variant="outline" icon={<FileText className="h-4 w-4" />} onClick={() => exportar('pdf')}>PDF</Button>
             {puede('inscripciones.crear') && ['programado', 'en_ejecucion'].includes(curso.estado) && (
@@ -91,6 +95,8 @@ export default function CursoDetallePage() {
             <div className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-zinc-400" />{formatFecha(curso.fecha_inicio)} – {formatFecha(curso.fecha_fin)}</div>
             <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-zinc-400" />{curso.horario || 'Sin horario definido'}</div>
             <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-zinc-400" />{MODALIDADES[curso.modalidad]}</div>
+            <div className="flex items-center gap-2"><UserCheck className="h-4 w-4 shrink-0 text-zinc-400" />Tutor: {curso.tutor_nombre || curso.tutor_email || 'Sin asignar'}</div>
+            <div className="flex items-start gap-2"><GraduationCap className="mt-0.5 h-4 w-4 shrink-0 text-zinc-400" />Profesores: {curso.profesores || 'Sin asignar'}</div>
             <div className="flex items-center justify-between"><dt className="text-zinc-500">Costo</dt><dd className="font-semibold">{formatMoneda(curso.costo)}</dd></div>
             {curso.descripcion && <p className="border-t border-zinc-100 pt-3 text-zinc-600 dark:border-white/[0.06] dark:text-zinc-400">{curso.descripcion}</p>}
           </dl>

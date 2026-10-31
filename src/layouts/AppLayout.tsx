@@ -2,7 +2,7 @@ import { Suspense, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   BarChart3, BookOpen, ChevronsLeft, ClipboardList, GraduationCap, History, LayoutDashboard, LogOut, Menu,
-  Moon, Monitor, Settings, Sun, Users, Wallet, WifiOff, X, UserCog,
+  Moon, Monitor, NotebookPen, Presentation, Settings, Sun, Users, Wallet, WifiOff, X, UserCog,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermisos } from '@/hooks/usePermisos';
@@ -28,6 +28,8 @@ const NAV: { grupo: string; items: NavItem[] }[] = [
       { to: '/cursos', label: 'Cursos', icon: BookOpen, permiso: 'cursos.ver' },
       { to: '/estudiantes', label: 'Estudiantes', icon: Users, permiso: 'estudiantes.ver' },
       { to: '/inscripciones', label: 'Inscripciones', icon: ClipboardList, permiso: 'inscripciones.ver' },
+      { to: '/profesores', label: 'Profesores', icon: Presentation, permiso: 'profesores.ver' },
+      { to: '/academico', label: 'Registro académico', icon: NotebookPen, permiso: 'academico.ver' },
     ],
   },
   { grupo: 'Finanzas', items: [{ to: '/pagos', label: 'Pagos', icon: Wallet, permiso: 'pagos.ver' }] },

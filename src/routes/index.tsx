@@ -13,6 +13,9 @@ const Dashboard = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const Cursos = lazy(() => import('@/pages/cursos/CursosPage'));
 const CursoDetalle = lazy(() => import('@/pages/cursos/CursoDetallePage'));
 const Estudiantes = lazy(() => import('@/pages/estudiantes/EstudiantesPage'));
+const Profesores = lazy(() => import('@/pages/profesores/ProfesoresPage'));
+const Academico = lazy(() => import('@/pages/academico/AcademicoPage'));
+const RegistroAcademico = lazy(() => import('@/pages/academico/RegistroAcademicoPage'));
 const Inscripciones = lazy(() => import('@/pages/inscripciones/InscripcionesPage'));
 const Pagos = lazy(() => import('@/pages/pagos/PagosPage'));
 const Reportes = lazy(() => import('@/pages/reportes/ReportesPage'));
@@ -44,6 +47,9 @@ export const router = createBrowserRouter([
       { path: '/cursos', element: <RequirePermiso permiso="cursos.ver"><Cursos /></RequirePermiso> },
       { path: '/cursos/:id', element: <RequirePermiso permiso="cursos.ver"><CursoDetalle /></RequirePermiso> },
       { path: '/estudiantes', element: <RequirePermiso permiso="estudiantes.ver"><Estudiantes /></RequirePermiso> },
+      { path: '/profesores', element: <RequirePermiso permiso="profesores.ver"><Profesores /></RequirePermiso> },
+      { path: '/academico', element: <RequirePermiso permiso="academico.ver"><Academico /></RequirePermiso> },
+      { path: '/academico/:id', element: <RequirePermiso permiso="academico.ver"><RegistroAcademico /></RequirePermiso> },
       { path: '/inscripciones', element: <RequirePermiso permiso="inscripciones.ver"><Inscripciones /></RequirePermiso> },
       { path: '/pagos', element: <RequirePermiso permiso="pagos.ver"><Pagos /></RequirePermiso> },
       { path: '/reportes', element: <RequirePermiso permiso="reportes.ver"><Reportes /></RequirePermiso> },

@@ -9,6 +9,7 @@ export type EstadoInscripcion = 'preinscrito' | 'inscrito' | 'retirado' | 'final
 export type MedioPago = 'efectivo' | 'yape' | 'plin' | 'transferencia' | 'tarjeta';
 export type EstadoPago = 'pendiente' | 'parcial' | 'pagado';
 export type AccionAuditoria = 'INSERT' | 'UPDATE' | 'DELETE';
+export type EstadoAcademico = 'en_curso' | 'aprobado' | 'desaprobado' | 'desaprobado_faltas' | 'retirado';
 
 export interface Rol {
   id: number;
@@ -41,12 +42,20 @@ export interface Curso {
   costo: number;
   cupos: number;
   estado: EstadoCurso;
+  tutor_id: string | null;
+  numero_sesiones: number;
+  faltas_maximas: number;
+  nota_aprobatoria: number;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
 }
 
 export interface CursoResumen extends Curso {
+  tutor_nombre: string | null;
+  tutor_email: string | null;
+  profesores: string | null;
+  profesor_ids: string[];
   inscritos: number;
   cupos_disponibles: number;
   pagados: number;
@@ -69,6 +78,28 @@ export interface Estudiante {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+}
+
+export interface Profesor {
+  id: string;
+  dni: string | null;
+  nombres: string;
+  apellidos: string;
+  telefono: string | null;
+  correo: string | null;
+  especialidad: string | null;
+  estado: EstadoRegistro;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+/** Usuario que puede ser tutor de un curso (administrador u operador). */
+export interface Personal {
+  id: string;
+  nombre_completo: string;
+  email: string;
+  rol: RolCodigo;
 }
 
 export interface Inscripcion {
@@ -118,6 +149,45 @@ export interface PagoDetalle extends Pago {
   curso_nombre: string;
   registrado_por: string | null;
   inscripcion_monto_total: number;
+}
+
+export interface Asistencia {
+  id: string;
+  inscripcion_id: string;
+  sesion: number;
+  asistio: boolean;
+  devocional: boolean;
+  interseccion: boolean;
+  servicio: boolean;
+}
+
+/** Fila de v_notas: resumen académico y promedio final de una inscripción. */
+export interface NotaDetalle {
+  inscripcion_id: string;
+  curso_id: string;
+  estudiante_id: string;
+  inscripcion_estado: EstadoInscripcion;
+  dni: string;
+  estudiante_nombre: string;
+  numero_sesiones: number;
+  faltas_maximas: number;
+  nota_aprobatoria: number;
+  sesiones_registradas: number;
+  asistencias: number;
+  faltas: number;
+  devocionales: number;
+  intersecciones: number;
+  servicios: number;
+  nota_asistencia: number;
+  nota_devocional: number;
+  nota_interseccion: number;
+  nota_servicio: number;
+  nota_trabajo: number | null;
+  nota_examen: number | null;
+  observacion: string | null;
+  promedio: number;
+  notas_completas: boolean;
+  estado_academico: EstadoAcademico;
 }
 
 export interface Configuracion {

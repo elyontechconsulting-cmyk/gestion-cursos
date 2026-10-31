@@ -5,6 +5,7 @@ import type { CursoInput } from '@/schemas/curso.schema';
 import { limpiar, rango, textoBusqueda, unwrap, unwrapPage } from './helpers';
 
 export interface CursoFiltros extends PageParams {
+  tutorId?: string;
   estado?: EstadoCurso | '';
   modalidad?: Modalidad | '';
   desde?: string;
@@ -18,6 +19,7 @@ export const cursosApi = {
     if (t) q = q.or(`nombre.ilike.%${t}%,codigo.ilike.%${t}%`);
     if (f.estado) q = q.eq('estado', f.estado);
     if (f.modalidad) q = q.eq('modalidad', f.modalidad);
+    if (f.tutorId) q = q.eq('tutor_id', f.tutorId);
     if (f.desde) q = q.gte('fecha_inicio', f.desde);
     if (f.hasta) q = q.lte('fecha_inicio', f.hasta);
     return unwrapPage(await q.order('codigo').range(...rango(f)));
@@ -40,12 +42,20 @@ export const cursosApi = {
     return unwrap(await supabase.from('v_cursos_resumen').select('*').eq('id', id).single());
   },
 
-  async crear(input: CursoInput): Promise<Curso> {
-    return unwrap(await supabase.from('cursos').insert(limpiar(input)).select().single());
+  async crear({ profesor_ids, ...input }: CursoInput): Promise<Curso> {
+    const curso: Curso = unwrap(await supabase.from('cursos').insert(limpiar(input)).select().single());
+    await cursosApi.guardarProfesores(curso.id, profesor_ids);
+    return curso;
   },
 
-  async actualizar(id: string, input: Partial<CursoInput>): Promise<Curso> {
-    return unwrap(await supabase.from('cursos').update(limpiar(input)).eq('id', id).select().single());
+  async actualizar(id: string, { profesor_ids, ...input }: CursoInput): Promise<Curso> {
+    const curso: Curso = unwrap(await supabase.from('cursos').update(limpiar(input)).eq('id', id).select().single());
+    await cursosApi.guardarProfesores(id, profesor_ids);
+    return curso;
+  },
+
+  async guardarProfesores(cursoId: string, profesorIds: string[]): Promise<void> {
+    unwrap(await supabase.rpc('fn_guardar_profesores_curso', { p_curso: cursoId, p_profesores: profesorIds }));
   },
 
   /** Soft delete: marca deleted_at; el trigger de auditoría lo registra como DELETE. */
@@ -60,7 +70,7 @@ export const cursosApi = {
   },
 
   async duplicar(id: string): Promise<Curso> {
-    const original: Curso = unwrap(await supabase.from('cursos').select('*').eq('id', id).single());
+    const original: CursoResumen = unwrap(await supabase.from('v_cursos_resumen').select('*').eq('id', id).single());
     const base = original.codigo.replace(/-C\d+$/, '').slice(0, 15);
     let codigo = `${base}-C1`;
     for (let i = 1; i < 50; i++) {
@@ -83,7 +93,13 @@ export const cursosApi = {
       costo: original.costo,
       cupos: original.cupos,
       estado: 'programado' as const,
+      tutor_id: original.tutor_id,
+      numero_sesiones: original.numero_sesiones,
+      faltas_maximas: original.faltas_maximas,
+      nota_aprobatoria: original.nota_aprobatoria,
     };
-    return unwrap(await supabase.from('cursos').insert(copia).select().single());
+    const curso: Curso = unwrap(await supabase.from('cursos').insert(copia).select().single());
+    if (original.profesor_ids.length) await cursosApi.guardarProfesores(curso.id, original.profesor_ids);
+    return curso;
   },
 };

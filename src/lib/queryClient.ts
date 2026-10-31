@@ -27,4 +27,7 @@ export const queryKeys = {
   dashboard: ['dashboard'] as const,
   reportes: ['reportes'] as const,
   configuracion: ['configuracion'] as const,
+  profesores: ['profesores'] as const,
+  academico: ['academico'] as const,
+  personal: ['personal'] as const,
 };

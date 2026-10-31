@@ -14,6 +14,11 @@ export const PERMISOS = {
   'pagos.ver':            ['administrador', 'operador', 'consulta'],
   'pagos.crear':          ['administrador', 'operador'],
   'pagos.anular':         ['administrador'],
+  'profesores.ver':       ['administrador', 'operador', 'consulta'],
+  'profesores.gestionar': ['administrador'],
+  'academico.ver':        ['administrador', 'operador', 'consulta'],
+  // El operador solo registra en los cursos donde es tutor (lo exige RLS)
+  'academico.registrar':  ['administrador', 'operador'],
   'reportes.ver':         ['administrador', 'consulta'],
   'usuarios.gestionar':   ['administrador'],
   'auditoria.ver':        ['administrador'],

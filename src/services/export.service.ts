@@ -108,6 +108,7 @@ export async function exportarExcel<T>(o: OpcionesExport<T>): Promise<void> {
       const cell = row.getCell(i + 1);
       cell.value = v as string | number;
       cell.font = { bold: true };
+      cell.alignment = { horizontal: 'right' };
       if (o.columnas[i]?.tipo === 'moneda') cell.numFmt = '"S/" #,##0.00';
     });
   }
@@ -144,8 +145,12 @@ export async function exportarPdf<T>(o: OpcionesExport<T>): Promise<void> {
     return String(v);
   };
 
+  // Los textos del total (p. ej. 'TOTAL') van tal cual aunque caigan en una columna de fecha
   const foot = o.totales
-    ? [o.columnas.map((c, i) => (o.totales![i] !== undefined ? formatear(c, o.totales![i]) : ''))]
+    ? [o.columnas.map((c, i) => {
+        const v = o.totales![i];
+        return v === undefined ? '' : typeof v === 'string' ? v : formatear(c, v);
+      })]
     : undefined;
 
   autoTable(doc, {
@@ -160,6 +165,10 @@ export async function exportarPdf<T>(o: OpcionesExport<T>): Promise<void> {
     columnStyles: Object.fromEntries(
       o.columnas.map((c, i) => [i, { halign: c.tipo === 'moneda' || c.tipo === 'numero' ? 'right' : 'left' }]),
     ),
+    // columnStyles no se aplica a la fila de totales: se alinea a la derecha aquí
+    didParseCell: (data) => {
+      if (data.section === 'foot') data.cell.styles.halign = 'right';
+    },
     didDrawPage: () => {
       const h = doc.internal.pageSize.getHeight();
       doc.setFontSize(8).setTextColor(140);

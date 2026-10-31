@@ -13,7 +13,7 @@ Sistema web para administrar cursos, estudiantes, inscripciones y pagos. Funcion
 | Rol | Puede |
 |---|---|
 | **Administrador** | Todo: cursos, estudiantes, inscripciones, pagos, reportes, usuarios y auditoría |
-| **Operador** | Registrar estudiantes, inscripciones y pagos; ver cursos y dashboard |
+| **Operador** | Registrar estudiantes, inscripciones y pagos; ver cursos y dashboard; como **tutor** de un curso, registrar asistencias y notas |
 | **Consulta** | Ver dashboard y reportes |
 
 Las opciones que su rol no permite no aparecen en el menú.
@@ -75,7 +75,36 @@ Saldo pendiente         S/ 200.00
 
 **Historial de pagos** muestra todos los pagos con filtros por medio, curso y fechas, y exportación a Excel. El administrador puede **anular** un pago indicando el motivo (queda en auditoría y el saldo se recalcula).
 
-## 8. Reportes
+## 8. Gestión académica
+
+**Profesores** (menú *Académico → Profesores*): catálogo de docentes. El administrador los registra (nombres, apellidos, DNI, teléfono, correo, especialidad) y los asigna a cada curso desde **Editar curso → Gestión académica**.
+
+En el mismo formulario del curso se define:
+
+* **Tutor / asistente**: el usuario (rol Operador) que registra asistencias y notas. Solo él y el administrador pueden registrar en ese curso; los demás lo ven en modo lectura.
+* **Sesiones** (por defecto 9, una por semana), **faltas máximas** (por defecto 3: al llegar a ese número el estudiante desaprueba y repite el curso) y **nota mínima** para aprobar (por defecto 11).
+
+**Registro académico** (menú *Académico → Registro académico*): el operador ve solo los cursos donde es tutor. Al abrir un curso hay dos pestañas:
+
+1. **Asistencia por sesión**: elija la sesión (1, 2, 3…; las ya registradas llevan un ✓ verde) y marque por estudiante *Asistió*, *Devocional*, *Intersección* (oración del sábado) y *Servicio*. La casilla del encabezado marca toda la columna. Pulse **Guardar sesión**. Puede volver a una sesión para corregirla. La columna *Faltas* se pone ámbar a una falta del límite y roja al alcanzarlo.
+2. **Notas y promedio**: registre el **trabajo final** y el **examen escrito** (0 a 20) y pulse **Guardar notas**.
+
+**Cálculo del promedio final** (promedio de 6 notas):
+
+| Nota | Cálculo |
+|---|---|
+| Asistencia | cantidad de asistencias × 2 |
+| Devocional | cantidad de devocionales × 2 |
+| Intersección | cantidad de intersecciones × 2 |
+| Servicio | cantidad de servicios × 2 |
+| Trabajo final | nota de 0 a 20 |
+| Examen escrito | nota de 0 a 20 |
+
+Cada nota por cantidad tiene un tope de 20. **Promedio = suma de las 6 notas ÷ 6.**
+
+**Estado académico**: *En curso* (falta el trabajo o el examen), *Aprobado* (promedio ≥ nota mínima), *Desaprobado*, *Desaprobado por faltas* (llegó al máximo de faltas, sin importar el promedio) o *Retirado*. El registro se exporta a **Excel** y **PDF**.
+
+## 9. Reportes
 
 | Reporte | Filtros | Contenido |
 |---|---|---|
@@ -85,12 +114,12 @@ Saldo pendiente         S/ 200.00
 
 Cada reporte tiene botones **Excel** y **PDF**. Los archivos incluyen título, filtros aplicados y fecha de generación (hora de Lima); los montos van en soles (S/) y las fechas en formato dd/mm/aaaa.
 
-## 9. Administración (solo administrador)
+## 10. Administración (solo administrador)
 
 * **Usuarios**: *Nuevo usuario* (con contraseña temporal o, sin ella, se envía una invitación por correo), cambiar rol 🛡️ y activar/desactivar ⏻. No puede cambiar su propio rol.
 * **Auditoría**: quién creó, modificó o eliminó cada registro y cuándo. Clic en una fila para ver los valores antes y después (los cambios se resaltan). Se conservan los últimos 12 meses; lo más antiguo se borra automáticamente cada mes.
 
-## 10. Instalar la aplicación
+## 11. Instalar la aplicación
 
 * **Android (Chrome)**: aparecerá el aviso *Instala la aplicación* → **Instalar**. También: menú ⋮ → *Instalar aplicación*.
 * **iPhone/iPad (Safari)**: toque **Compartir** ⬆️ → **Agregar a inicio**.
@@ -98,7 +127,7 @@ Cada reporte tiene botones **Excel** y **PDF**. Los archivos incluyen título, f
 
 **Sin conexión**: la app abre y muestra los últimos datos consultados (aparece una franja amarilla). Para registrar o modificar información se necesita internet. Cuando haya una versión nueva verá el aviso *Actualizar*.
 
-## 11. Preguntas frecuentes
+## 12. Preguntas frecuentes
 
 * **"No hay cupos disponibles"**: el curso está lleno. Aumente los cupos (administrador) o retire a alguien.
 * **"El monto excede el saldo pendiente"**: alguien registró otro pago al mismo tiempo; cierre y vuelva a abrir el pago.

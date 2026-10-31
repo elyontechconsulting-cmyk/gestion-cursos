@@ -1,5 +1,5 @@
 import type {
-  EstadoCurso, EstadoInscripcion, EstadoPago, EstadoRegistro, MedioPago, Modalidad, RolCodigo,
+  EstadoAcademico, EstadoCurso, EstadoInscripcion, EstadoPago, EstadoRegistro, MedioPago, Modalidad, RolCodigo,
 } from '@/types/database';
 
 export const MODALIDADES: Record<Modalidad, string> = {
@@ -34,6 +34,14 @@ export const MEDIOS_PAGO: Record<MedioPago, string> = {
 
 export const ESTADOS_PAGO: Record<EstadoPago, string> = { pendiente: 'Pendiente', parcial: 'Parcial', pagado: 'Pagado' };
 
+export const ESTADOS_ACADEMICOS: Record<EstadoAcademico, string> = {
+  en_curso: 'En curso',
+  aprobado: 'Aprobado',
+  desaprobado: 'Desaprobado',
+  desaprobado_faltas: 'Desaprobado por faltas',
+  retirado: 'Retirado',
+};
+
 export const ROLES: Record<RolCodigo, string> = {
   administrador: 'Administrador',
   operador: 'Operador',
@@ -48,6 +56,7 @@ export const TONO_ESTADO: Record<string, Tono> = {
   preinscrito: 'amber', inscrito: 'blue', retirado: 'red',
   pendiente: 'red', parcial: 'amber', pagado: 'green',
   administrador: 'violet', operador: 'blue', consulta: 'gray',
+  en_curso: 'blue', aprobado: 'green', desaprobado: 'red', desaprobado_faltas: 'red',
 };
 
 export const toOptions = <K extends string>(rec: Record<K, string>) =>
